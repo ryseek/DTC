@@ -16,24 +16,12 @@ def run_server(host, port):
             self.user_peername = peername
             self.count = 0
 
-    class MyEchoClientProtocol(asyncio.Protocol):
-        def connection_made(self, transport):
-            message = "hello"
-            transport.write(message.encode())
-            print('Data sent: {!r}'.format(message))
-
-        def data_received(self, data):
-            print('Data received: {!r}'.format(data.decode()))
-
-        def connection_lost(self, exc):
-            print('The server closed the connection')
-            print('Stop the event loop')
-            loop.stop()
-
     class ClientServerProtocol(asyncio.Protocol):
 
         active_users = []
         active_nodes = []
+
+        selfadress = (host,port)
 
         def connection_made(self, transport):
             self.peername = transport.get_extra_info('peername')
@@ -44,9 +32,8 @@ def run_server(host, port):
             user = User(self.transport, self.peername)
             self.active_users.append(user)
 
-            str = "\nDecentralized chat V1 by ryseek and kupreeva \n\n"
-            self.transport.write(str.encode())
-            self.transport.write('>>'.encode())
+            name = "/node " + host + " " + str(port) + "\n"
+            self.transport.write(name.encode())
 
         def connection_lost(self, exc):
             str = "left our group \n"
@@ -71,6 +58,7 @@ def run_server(host, port):
             if perenos == "\r" or perenos == "\n":
                 data = data[:len(data) - 1]
 
+            print(data)
             if data == "/node":
                 for user in self.active_users:
                     if user.user_transport == self.transport:
@@ -80,16 +68,28 @@ def run_server(host, port):
             if data == "/print":
                 self.printAllUsers()
 
+            if data == "/self":
+                self.printSelfAdress()
+
             if data.__contains__("/connect"):
                 split = data.split(" ")
-                self.connectTo(0, 0)
+                self.connectTo(split[1], split[2])
+
+            if data.__contains__("/node"):
+                split = data.split(" ")
+                for user in self.active_users:
+                    if user.user_transport == self.transport:
+                        self.active_users.remove(user)
+                        newNode = Node(user.user_transport,user.user_peername)
+                        self.active_nodes.append(newNode)
 
             for user in self.active_users:
                 if user.user_transport != self.transport:
                     str = "[{}]: ".format(user.user_peername) + data + "\n"
+                    user.user_transport.write(str.encode())
                 else:
                     str = ">>"
-                user.user_transport.write(str.encode())
+
 
         def printAllUsers(self):
             str = "\n"
@@ -99,13 +99,18 @@ def run_server(host, port):
             str = str + "Nodes: \n"
             for user in self.active_nodes:
                 str = str + "{}".format(user.user_peername) + "\n"
+            str = str + "\n"
             self.transport.write(str.encode())
 
+        def printSelfAdress(self):
+            adress = "node " + self.selfadress[0] + ":" + str(self.selfadress[1]) + "\n\n"
+            self.transport.write(adress.encode())
+
         def connectTo(self, host, port):
-            print("hey there")
+            print(host+port)
 
             loop = asyncio.get_event_loop()
-            coro = loop.create_connection(MyEchoClientProtocol, '192.168.31.253', 8888)
+            coro = loop.create_connection(ClientServerProtocol, host, int(port))
             loop.run_until_complete(coro)
             loop.run_forever()
             loop.close()
@@ -125,4 +130,4 @@ def run_server(host, port):
     loop.close()
 
 
-run_server("192.168.31.99", 8888) # enter your ip adress here
+run_server("192.168.31.99", 8001) # enter your ip adress here

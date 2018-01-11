@@ -18,7 +18,12 @@ class MyEchoClientProtocol(asyncio.Protocol):
 
 
 loop = asyncio.get_event_loop()
-coro = loop.create_connection(MyEchoClientProtocol, '192.168.31.253', 8888)
+coro = loop.create_connection(MyEchoClientProtocol, '192.168.31.99', 8000)
+
 loop.run_until_complete(coro)
-loop.run_forever()
+try:
+    loop.run_forever()
+except KeyboardInterrupt:
+    pass
+
 loop.close()
