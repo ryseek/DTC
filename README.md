@@ -9,7 +9,7 @@ Everything, that was uploaded over that connection will push to other active con
 Also this server can connect to another server.
 This way it is possible to create a decentralized network using almost identical code for each node.
 
-#Setup guide
+# Setup guide
 
 Requirements: **Python 3.4** and above.
 
@@ -20,7 +20,7 @@ Port = 8000
 ```
 And run this python file. 
 
-#How to test it
+# How to test it
 
 We can create a special client app, but it's easier to use **telnet**.
 Run in terminal:
@@ -31,7 +31,7 @@ It opens a TCP connection to server.
 If you will write something there and hit `Enter` button server will receive this message and send it to other connected users.
 So to see it run the same command in new terminal window. 
 
-#Prompt Commands
+# Prompt Commands
 
 This commands are used to control the server from TCP connection
 
