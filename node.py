@@ -1,7 +1,9 @@
 import asyncio
-
+IP = "127.0.0.1"
+Port = 8000
 
 def run_server(host, port):
+
     class User:
 
         def __init__(self, transport, peername):
@@ -130,4 +132,4 @@ def run_server(host, port):
     loop.close()
 
 
-run_server("192.168.31.99", 8001) # enter your ip adress here
+run_server(IP, Port)
